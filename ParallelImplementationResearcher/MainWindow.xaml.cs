@@ -23,6 +23,7 @@ namespace ParallelImplementationResearcher
 		public MainWindow()
 		{
 			InitializeComponent();
+			lb_threads.ThreadNumber = 16;
 		}
 	}
 }

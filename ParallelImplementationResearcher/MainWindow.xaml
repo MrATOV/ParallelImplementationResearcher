@@ -5,8 +5,93 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ParallelImplementationResearcher"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" MinHeight="600" MinWidth="1140">
     <Grid>
-
+        <Grid.RowDefinitions>
+            <RowDefinition Height="25"/>
+            <RowDefinition Height="100"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="20"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="200"/>
+            <ColumnDefinition Width="200"/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <Menu Height="30" FontSize="15" VerticalAlignment="Top" Grid.ColumnSpan="3">
+            <MenuItem Header="Файл">
+                <MenuItem Header="Выход"/>
+            </MenuItem>
+            <MenuItem Header="Плагины">
+                <MenuItem Header="Загрузить плагин"/>
+                <MenuItem Header="Список плагинов"/>
+            </MenuItem>
+            <MenuItem Header="Помощь"/>
+        </Menu>
+        <TabControl Grid.Column="2" Grid.Row="1" Grid.RowSpan="3">
+            <TabItem Header="Исходные данные">
+                <StackPanel>
+                    <Label x:Name="l_DataType" FontSize="15" FontWeight="Bold" BorderBrush="Black" BorderThickness="1" Content="Тип данных: " Height="30"/>
+                    <GroupBox Header="Массив">
+                        <WrapPanel Orientation="Horizontal">
+                            <Button Content="Загрузить массив из файла" Margin="2,18,2,7" />
+                            <GroupBox Header="Минимальное">
+                                <local:NumericUpDown/>
+                            </GroupBox>
+                            <GroupBox Header="Максимальное">
+                                <local:NumericUpDown/>
+                            </GroupBox>
+                            <GroupBox Header="Количество элементов">
+                                <local:NumericUpDown/>
+                            </GroupBox>
+                            <Button Content="Сгенерировать" Margin="2,18,2,7"/>
+                        </WrapPanel>
+                    </GroupBox>
+                    <GroupBox Header="Матрица">
+                        <WrapPanel Orientation="Horizontal">
+                            <Button Content="Загрузить матрицу из файла" Margin="2,18,2,7" />
+                            <GroupBox Header="Минимальное">
+                                <local:NumericUpDown/>
+                            </GroupBox>
+                            <GroupBox Header="Максимальное">
+                                <local:NumericUpDown/>
+                            </GroupBox>
+                            <GroupBox Header="Количество строк">
+                                <local:NumericUpDown/>
+                            </GroupBox>
+                            <GroupBox Header="Количество столбцов">
+                                <local:NumericUpDown/>
+                            </GroupBox>
+                            <Button Content="Сгенерировать" Margin="2,18,2,7"/>
+                        </WrapPanel>
+                    </GroupBox>
+                </StackPanel>
+            </TabItem>
+            <TabItem Header="Обработанные данные"></TabItem>
+            <TabItem Header="Результат исследования"></TabItem>
+            <TabItem Header="Все исследования"></TabItem>
+        </TabControl>
+        <ListBox Name="lb_AlgorithmList" Grid.Row="1" Grid.ColumnSpan="2">
+            <TextBlock FontWeight="Bold" Text="Алгоритмы" FontSize="15"/>
+        </ListBox>
+        <StackPanel Grid.Column="0" Grid.Row="2">
+            <TextBlock Text="Параметры алгоритма" FontSize="15" FontWeight="Bold"/>
+        </StackPanel>
+        <StackPanel Grid.Column="1" Grid.Row="2">
+            <TextBlock Text="Параметры исследования" FontWeight="Bold" FontSize="15"/>
+            <TextBlock Text="Количество итераций" Margin="0,14,0,0"/>
+            <local:NumericUpDown x:Name="nud_ExecuteIterationNumber"  MinValue="-1" MaxValue="19" />
+            <TextBlock Text="Количество потоков" Margin="0,14,0,0"/>
+            <local:ThreadListBox x:Name="lb_threads"/>
+            <TextBlock Text="Коэффициент доверительного интервала" TextWrapping="Wrap" Margin="0,14,0,0"/>
+            <ComboBox x:Name="cb_IntervalCoefficient"/>
+            <TextBlock Text="Величина для расчета доверительного интервала" TextWrapping="Wrap" Margin="0,14,0,0"/>
+            <ComboBox x:Name="cb_IntervalValue"/>
+            <TextBlock Text="Уровень доверия" Margin="0,14,0,0"/>
+            <ComboBox x:Name="cb_TrustValue"/>
+        </StackPanel>
+        <Button Content="Выполнить" Grid.ColumnSpan="2" Grid.Row="3" Margin="60,2"/>
+        <TextBox Grid.Row="4" Grid.ColumnSpan="3"/>
     </Grid>
 </Window>

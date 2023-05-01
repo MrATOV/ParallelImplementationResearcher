@@ -1,0 +1,21 @@
+﻿<UserControl x:Class="ParallelImplementationResearcher.NumericUpDown"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ParallelImplementationResearcher"
+             mc:Ignorable="d" >
+    <Grid  Height="24" Margin="1,1,1,1" VerticalAlignment="Top">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="12"/>
+            <RowDefinition Height="12"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="16"/>
+        </Grid.ColumnDefinitions>
+        <TextBox x:Name="textNumber" Grid.RowSpan="2" x:FieldModifier="private" Text="0" Padding="0,2,0,0" TextChanged="textNumber_TextChanged" />
+        <Button x:Name="buttonUp" Grid.Column="1" x:FieldModifier="private" FontSize="10" Padding="0,-2,0,0" Content="▲" Width="15" Click="buttonUp_Click" />
+        <Button x:Name="buttonDown" Grid.Column="1" Grid.Row="1" x:FieldModifier="private" FontSize="10" Padding="0,-2,0,0" Content="▼" Width="15" Click="buttonDown_Click" />
+    </Grid>
+</UserControl>
