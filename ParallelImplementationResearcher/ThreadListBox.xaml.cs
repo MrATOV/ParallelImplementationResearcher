@@ -29,11 +29,30 @@ namespace ParallelImplementationResearcher
                 _threadNumber = value;
                 for(int i = 0; i < _threadNumber; i++)
                 {
-                    AddCheckBox(i);
+                    SetCheckBox(i);
                 }
             }
         }
-        private void AddCheckBox(int index)
+
+        public List<int> GetCheckedThreads
+        {
+            get
+            {
+                List<int> checkedThreads= new List<int>();
+                foreach(var check in CheckList.Children)
+                {
+                    if (check is CheckBox) {
+                        if ((check as CheckBox) is not null && (check as CheckBox).IsChecked == true)
+                        {
+                            checkedThreads.Add(int.Parse((check as CheckBox).Content.ToString()));
+                        }
+                    }
+                }
+                return checkedThreads;
+            }
+        }
+
+        private void SetCheckBox(int index)
         {
             CheckBox cb = new CheckBox();
             cb.IsChecked = true;

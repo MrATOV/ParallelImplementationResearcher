@@ -9,6 +9,7 @@ using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
@@ -20,11 +21,11 @@ namespace ParallelImplementationResearcher
     /// </summary>
     public partial class NumericUpDown : UserControl
     {
-		private int _value = 0;
-		private int _minValue = 0;
-		private int _maxValue = 1;
+		private long _value = 0;
+		private long _minValue = long.MinValue;
+		private long _maxValue = long.MaxValue;
 
-		public int Value
+		public long Value
 		{
 			get
 			{
@@ -36,35 +37,47 @@ namespace ParallelImplementationResearcher
 				textNumber.Text = _value.ToString();
 			}
 		}
+		public ulong uValue
+		{
+			get
+			{
+				return (ulong)_value;
+			}
+		}
 
-		public int MinValue
+		public long MinValue
 		{
 			get { return _minValue; }
-			set { _minValue = value; }
+			set { _minValue = value; CheckingValues(value); }
 		}
 
-		public int MaxValue
+		public long MaxValue
 		{
 			get { return _maxValue; }
-			set { _maxValue = value; }
+			set { _maxValue = value; CheckingValues(value); }
 		}
-        public NumericUpDown()
-        {
-            InitializeComponent();
-			if (_value > _maxValue)
+
+		private void CheckingValues(long value)
+		{
+			if (value > _maxValue)
 			{
-				textNumber.Text = _maxValue.ToString();
-				_value = _maxValue;
+				Value = _maxValue;
 			} 
-			else if (_value < _minValue)
+			else if (value < _minValue)
 			{
-				textNumber.Text = _minValue.ToString();
-				_value = _minValue;
+				Value = _minValue;
 			} 
 			else
 			{
-				textNumber.Text = _value.ToString();
+				Value = value;
 			}
+
+		}
+
+        public NumericUpDown()
+        {
+            InitializeComponent();
+			
         }
 
 		private void buttonUp_Click(object sender, RoutedEventArgs e)
@@ -89,17 +102,9 @@ namespace ParallelImplementationResearcher
 			{
 				return;
 			}
-			if (!int.TryParse(textNumber.Text, out _value))
+			if (!long.TryParse(textNumber.Text, out _value))
 			{
-				textNumber.Text = _value.ToString();
-			}
-			if (_value > _maxValue)
-			{
-				Value = _maxValue;
-			} 
-			else if (_value < _minValue)
-			{
-				Value = _minValue;
+				CheckingValues(_value);
 			}
 		}
 	}
