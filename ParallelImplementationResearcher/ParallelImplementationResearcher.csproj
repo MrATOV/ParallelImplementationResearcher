@@ -8,6 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="ScottPlot.WPF" Version="4.1.63" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\ResearchKernelWrapper\ResearchKernelWrapper.vcxproj" />
   </ItemGroup>
 

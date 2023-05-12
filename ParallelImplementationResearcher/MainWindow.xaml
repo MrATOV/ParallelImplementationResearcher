@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ParallelImplementationResearcher"
         xmlns:localkernel="clr-namespace:ResearchKernelWrapper;assembly=ResearchKernelWrapper"
+        xmlns:ScottPlot="clr-namespace:ScottPlot;assembly=ScottPlot.WPF"
         mc:Ignorable="d"
         Title="Исследование параллельной реализации алгоритмов" MinHeight="700" MinWidth="1140" Loaded="Window_Loaded">
     <Grid>
@@ -26,7 +27,7 @@
             </MenuItem>
             <MenuItem Header="Плагины">
                 <MenuItem Header="Загрузить плагин" Click="MenuLoadPlugin_Click"/>
-                <MenuItem Header="Список плагинов" Click="MenuItem_Click"/>
+                <MenuItem Header="Список плагинов" Click="MenuOpenPluginListItem_Click"/>
             </MenuItem>
             <MenuItem Header="Помощь"/>
         </Menu>
@@ -34,73 +35,153 @@
             <TabItem Header="Исходные данные">
                 <DockPanel>
                     <Label DockPanel.Dock="Top" x:Name="l_DataType" FontSize="15" FontWeight="Bold" BorderBrush="Black" BorderThickness="1" Content="Тип данных: " Height="30"/>
-                    <GroupBox DockPanel.Dock="Left" x:Name="gb_Array" Header="Массив" Visibility="Visible">
+                    <GroupBox  DockPanel.Dock="Top" x:Name="gb_Array" Header="Массив" Visibility="Visible">
                             <Grid>
-                                <Grid.RowDefinitions>
-                                <RowDefinition Height="*"/>
-                                <RowDefinition Height="*"/>
-                                <RowDefinition Height="*"/>
-                                <RowDefinition Height="*"/>
-                                <RowDefinition Height="*"/>
-                            </Grid.RowDefinitions>
-                            <ComboBox x:Name="cb_ArrayGenerateType" VerticalAlignment="Center" Grid.Row="0" SelectionChanged="cb_ArrayGenerateType_SelectionChanged">
+                                <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="0.5*"/>
+                                <ColumnDefinition Width="0.5*"/>
+                            </Grid.ColumnDefinitions>
+                            <ComboBox x:Name="cb_ArrayGenerateType" VerticalAlignment="Center" Grid.Column="0" SelectionChanged="cb_ArrayGenerateType_SelectionChanged" Margin="5,0,5,0">
                                 <TextBlock Text="Случайные значения"/>
                                 <TextBlock Text="Последовательность"/>
                             </ComboBox>
-                            <StackPanel VerticalAlignment="Center" x:Name="p_Array_Random" Grid.Row="2">
-                                <TextBlock Text="Минимальное значение"/>
-                                <local:NumericUpDown x:Name="nud_MinArray"/>
-                                <TextBlock Text="Максимальное значение" Margin="0,25,0,0"/>
-                                <local:NumericUpDown x:Name="nud_MaxArray"/>
-                            </StackPanel>
-                            <CheckBox x:Name="cb_Array_Sequence" Grid.Row="2" VerticalAlignment="Center" Content="По возрастанию" Visibility="Collapsed"/>
-                            <StackPanel Grid.Row="1" VerticalAlignment="Center">
+                            <WrapPanel VerticalAlignment="Center" x:Name="p_Array_Random" Grid.Column="2">
+                                <StackPanel Margin="5,0,5,0">
+                                    <TextBlock Text="Минимальное значение"/>
+                                    <local:NumericUpDown x:Name="nud_MinArray" Value="0"/>
+                                </StackPanel>
+                                <StackPanel Margin="5,0,5,0">
+                                    <TextBlock Text="Максимальное значение"/>
+                                    <local:NumericUpDown x:Name="nud_MaxArray" Value="0"/>
+                                </StackPanel>
+                            </WrapPanel>
+                            <CheckBox x:Name="cb_Array_Sequence" Grid.Column="2" VerticalAlignment="Center" Content="По возрастанию" Visibility="Collapsed"/>
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="5,0,5,0">
                                 <TextBlock Text="Количество элементов"/>
-                                <local:NumericUpDown x:Name="nud_ArraySize"/>
+                                <local:NumericUpDown x:Name="nud_ArraySize" MinValue="0"/>
                             </StackPanel>
-                            <Button x:Name="b_GetArrayFromFile" VerticalAlignment="Center" Grid.Row="4" Content="Загрузить массив из файла" Click="b_GetArrayFromFile_Click" />
-                            <Button x:Name="b_GenerateArray" VerticalAlignment="Center" Grid.Row="3" Content="Сгенерировать" Click="b_GenerateArray_Click"/>
+                            <Button x:Name="b_GetArrayFromFile" VerticalAlignment="Center" Grid.Column="4" Content="Загрузить массив из файла" Click="b_GetArrayFromFile_Click" />
+                            <Button x:Name="b_GenerateArray" VerticalAlignment="Center" Grid.Column="3" Content="Сгенерировать" Click="b_GenerateArray_Click" Margin="5,0,5,0"/>
                         </Grid>
                         </GroupBox>
-                    <GroupBox DockPanel.Dock="Left" x:Name="gb_Matrix" Header="Матрица" Visibility="Visible">
+                    <GroupBox DockPanel.Dock="Top" x:Name="gb_Matrix" Header="Матрица" Visibility="Visible">
                             <Grid>
-                                <Grid.RowDefinitions>
-                                <RowDefinition Height="*"/>
-                                <RowDefinition Height="*"/>
-                                <RowDefinition Height="*"/>
-                                <RowDefinition Height="*"/>
-                                <RowDefinition Height="*"/>
-                            </Grid.RowDefinitions>
-                            <ComboBox x:Name="cb_MatrixGenerateType" VerticalAlignment="Center" Grid.Row="0" SelectionChanged="cb_MatrixGenerateType_SelectionChanged">
+                                <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="0.5*"/>
+                                <ColumnDefinition Width="0.5*"/>
+                            </Grid.ColumnDefinitions>
+                            <ComboBox x:Name="cb_MatrixGenerateType" VerticalAlignment="Center" Grid.Column="0" SelectionChanged="cb_MatrixGenerateType_SelectionChanged" Margin="5,0,5,0">
                                 <TextBlock Text="Случайные значения"/>
                                 <TextBlock Text="Последовательность"/>
                             </ComboBox>
-                            <StackPanel VerticalAlignment="Center" x:Name="p_Matrix_Random" Grid.Row="2">
-                                <TextBlock Text="Минимальное значение"/>
-                                <local:NumericUpDown Value="0" x:Name="nud_MinMatrix"/>
-                                <TextBlock Text="Максимальное значение" Margin="0,25,0,0"/>
-                                <local:NumericUpDown Value="0" x:Name="nud_MaxMatrix"/>
-                            </StackPanel>
-                            <CheckBox x:Name="cb_Matrix_Sequence" Grid.Row="2" VerticalAlignment="Center" Content="По возрастанию" Visibility="Collapsed"/>
-                            <StackPanel Grid.Row="1" VerticalAlignment="Center">
-                                <TextBlock Text="Количество строк"/>
-                                <local:NumericUpDown MinValue="1" x:Name="nud_MatrixRowSize"/>
-                                <TextBlock Text="Количество столбцов" Margin="0,23,0,0" />
-                                <local:NumericUpDown MinValue="1" x:Name="nud_MatrixColumnSize"/>
-                            </StackPanel>
-                            <Button x:Name="b_GetMatrixFromFile" VerticalAlignment="Center" Grid.Row="4" Content="Загрузить массив из файла" Click="b_GetMatrixFromFile_Click" />
-                            <Button x:Name="b_generateMatrix" VerticalAlignment="Center" Grid.Row="3" Content="Сгенерировать" Click="b_generateMatrix_Click"/>
+                            <WrapPanel VerticalAlignment="Center" x:Name="p_Matrix_Random" Grid.Column="2">
+                                <StackPanel Margin="5,0,11,0">
+                                    <TextBlock Text="Минимальное значение"/>
+                                    <local:NumericUpDown Value="0" x:Name="nud_MinMatrix"/>
+                                </StackPanel>
+                                <StackPanel Margin="5,0,8,0">
+                                    <TextBlock Text="Максимальное значение"/>
+                                    <local:NumericUpDown Value="0" x:Name="nud_MaxMatrix"/>
+                                </StackPanel>
+                            </WrapPanel>
+                            <CheckBox x:Name="cb_Matrix_Sequence" Grid.Column="2" VerticalAlignment="Center" Content="По возрастанию" Visibility="Collapsed" Margin="5,0,5,0"/>
+                            <WrapPanel Grid.Column="1" VerticalAlignment="Center">
+                                <StackPanel Margin="5,0,5,0">
+                                    <TextBlock Text="Количество строк"/>
+                                    <local:NumericUpDown MinValue="1" x:Name="nud_MatrixRowSize"/>
+                                </StackPanel>
+                                <StackPanel Margin="5,0,5,0">
+                                    <TextBlock Text="Количество столбцов" />
+                                    <local:NumericUpDown MinValue="1" x:Name="nud_MatrixColumnSize"/>
+                                </StackPanel>
+                            </WrapPanel>
+                            <Button x:Name="b_GetMatrixFromFile" VerticalAlignment="Center" Grid.Column="4" Content="Загрузить массив из файла" Click="b_GetMatrixFromFile_Click" Margin="5,0,5,0" />
+                            <Button x:Name="b_generateMatrix" VerticalAlignment="Center" Grid.Column="3" Content="Сгенерировать" Click="b_generateMatrix_Click" Margin="5,0,5,0"/>
                         </Grid>
                         </GroupBox>
-                    
-                    <ListBox/>
+
+                    <TabControl x:Name="TabInputData">
+                        
+                    </TabControl>
                 </DockPanel>
             </TabItem>
-            <TabItem x:Name="TabProcessingData" Header="Обработанные данные">
-                
+            <TabItem Header="Обработанные данные">
+                <TabControl x:Name="TabProcessingData"/>
             </TabItem>
-            <TabItem Header="Результат исследования"></TabItem>
-            <TabItem Header="Все исследования"></TabItem>
+            <TabItem Header="Все исследования">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <ComboBox x:Name="cb_ResearchList"/>
+                    <DataGrid Grid.Row="1" x:Name="DataResearchTable" CanUserAddRows="False" CanUserDeleteRows="False" CanUserResizeColumns="False" CanUserResizeRows="False" AutoGenerateColumns="false" IsReadOnly="True" ColumnWidth="*" FontSize="14" FontFamily="Times New Roman" SelectionChanged="DataResearchTable_SelectionChanged">
+                        <DataGrid.Resources>
+                            <Style TargetType="TextBlock" x:Key="WrapText">
+                                <Setter Property="TextWrapping" Value="Wrap"/>
+                            </Style>
+                        </DataGrid.Resources>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Номер" Width="0.20*" Binding="{Binding Path=ID}" ElementStyle="{StaticResource WrapText}"/>
+                            <DataGridTextColumn Header="Название функции" Width="0.5*" Binding="{Binding Path=AlgorithmName}" ElementStyle="{StaticResource WrapText}"/>
+                            <DataGridTextColumn Header="Параметры" Width="0.5*" Binding="{Binding Path=Parameters}" ElementStyle="{StaticResource WrapText}"/>
+                            <DataGridTextColumn Header="Способ реализации" Width="0.5*" Binding="{Binding Path=TypeImplementation}" ElementStyle="{StaticResource WrapText}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <GridSplitter Grid.ColumnSpan="1" Grid.Row="2" ShowsPreview="false" Height="10" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
+                    <TabControl Grid.Row="3" TabStripPlacement="Bottom">
+                        <TabItem Header="График">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <ScottPlot:WpfPlot x:Name="BarPlot" Height="Auto" Width="Auto"/>
+                                <Grid Grid.Row="1">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="0.6*"/>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <RadioButton x:Name="rb_Time" Grid.Column="0" GroupName="PlotType" Content="Время" Checked="RadioButton_Checked"/>
+                                    <RadioButton Grid.Column="1" GroupName="PlotType" Content="Коэффициент ускорения" Checked="RadioButton_Checked"/>
+                                    <RadioButton Grid.Column="2" GroupName="PlotType" Content="Коэффициент эффективности" Checked="RadioButton_Checked"/>
+                                    <RadioButton Grid.Column="3" GroupName="PlotType" Content="Коэффициент стоимости" Checked="RadioButton_Checked"/>
+                                </Grid>
+                            </Grid>
+                        </TabItem>
+                        <TabItem Header="Таблица">
+                            <DataGrid x:Name="AlgorithmEvaluationTable" CanUserAddRows="False" CanUserDeleteRows="False" CanUserResizeColumns="False" CanUserResizeRows="False" AutoGenerateColumns="false" IsReadOnly="True" ColumnWidth="*" FontSize="14" FontFamily="Times New Roman">
+                                <DataGrid.Resources>
+                                    <Style TargetType="TextBlock" x:Key="WrapText">
+                                        <Setter Property="TextWrapping" Value="Wrap"/>
+                                    </Style>
+                                </DataGrid.Resources>
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Номер" Width="0.3*" Binding="{Binding Path=ID}" ElementStyle="{StaticResource WrapText}"/>
+                                    <DataGridTextColumn Header="Количество потоков" Width="1*" Binding="{Binding Path=ThreadNumber}" ElementStyle="{StaticResource WrapText}"/>
+                                    <DataGridTextColumn Header="Время выполнения" Width="1*" Binding="{Binding Path=Time}" ElementStyle="{StaticResource WrapText}"/>
+                                    <DataGridTextColumn Header="Коэффициент ускорения" Width="1*" Binding="{Binding Path=Acceleration}" ElementStyle="{StaticResource WrapText}"/>
+                                    <DataGridTextColumn Header="Коэффициент эффективности" Width="1*" Binding="{Binding Path=Efficiency}" ElementStyle="{StaticResource WrapText}"/>
+                                    <DataGridTextColumn Header="Коэффициент стоймости" Width="1*" Binding="{Binding Path=Cost}" ElementStyle="{StaticResource WrapText}"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </TabItem>
+                    </TabControl>
+                </Grid>
+            </TabItem>
         </TabControl>
         <Border Padding="12,0,12,0" Background="GhostWhite" BorderBrush="Gainsboro" BorderThickness="1" Grid.Column="0" Grid.Row="2">
             <StackPanel x:Name="p_Parameters">

@@ -87,7 +87,7 @@ namespace ResearchKernelWrapper {
 		}
 
 	public:
-		ResearchBase() : pb(new PluginBase){}
+		ResearchBase() : pb(new PluginBase) {}
 		~ResearchBase() {
 			delete pb;
 		}
@@ -111,17 +111,27 @@ namespace ResearchKernelWrapper {
 			pb->addThreadValue(ThreadNumber);
 		}
 
-		void SetResearchName(String^ researchName) {
-			pin_ptr<const WCHAR> strResearchName = PtrToStringChars(researchName);
-			pb->setResearchName(strResearchName);
+		void AddThreadValues(List<int>^ ThreadNumbers) {
+			for (int i = 0; i < ThreadNumbers->Count; i++) {
+				pb->addThreadValue(ThreadNumbers[i]);
+			}
 		}
 
-		void SetConfidenceIntervalOptions(size_t size, AlphaPercent alphaPercent, 
+		void SetConfidenceIntervalOptions(size_t size, AlphaPercent alphaPercent,
 			IntervalTypeValue intervalTypeValue, CalculateValue calculateValue) {
 			Alpha alpha = static_cast<Alpha>(alphaPercent);
 			IntervalType intervalType = static_cast<IntervalType>(intervalTypeValue);
 			CalcValue calcValue = static_cast<CalcValue>(calculateValue);
 			pb->setConfidenceIntervalOptions(size, alpha, intervalType, calcValue);
+		}
+
+		void AddResearchToDB(String^ researchName) {
+			pin_ptr<const WCHAR> strResearchName = PtrToStringChars(researchName);
+			pb->addResearchDB(strResearchName);
+		}
+
+		void AddResearchInformationToDB() {
+			pb->addResearchInformationDB();
 		}
 
 		void SetArrayData(String^ dataType, size_t size, int minValue, int maxValue) {
@@ -132,6 +142,22 @@ namespace ResearchKernelWrapper {
 		void SetArrayData(String^ dataType, size_t size, bool isIncrease) {
 			pin_ptr<const WCHAR> strDataType = PtrToStringChars(dataType);
 			pb->setArrayData(strDataType, size, isIncrease);
+		}
+
+		generic <class T>
+		array<T>^ GetData(size_t index, size_t size) {
+			array<T>^ arr = gcnew array<T>(size);
+			pin_ptr<T> p = &arr[0];
+			pb->getData(index, p);
+			return arr;
+		}
+
+		generic <class T>
+		array<T,2>^ GetProcessingData(size_t index, size_t dataSize, size_t arraySize) {
+			array<T, 2>^ arr = gcnew array<T, 2>(dataSize, arraySize);
+			pin_ptr<T> p = &arr[0,0];
+			pb->getProcessingData(index, p);
+			return arr;
 		}
 
 		void SetMatrixData(String^ dataType, size_t rowSize, size_t columnSize, int minValue, int maxValue) {
@@ -166,9 +192,49 @@ namespace ResearchKernelWrapper {
 			}
 		}
 
+		property List<String^>^ GetResearchList {
+			List<String^>^ get() {
+				int number = pb->getResearchListCount();
+				List<String^>^ researchList = gcnew List<String^>(number);
+				String^ research;
+				for (int i = 0; i < number; i++) {
+					research = gcnew String(pb->getResearchListRow(i));
+					researchList->Add(research);
+				}
+				return researchList;
+			}
+		}
+
+		List<String^>^ GetDataResearch(int index) {
+			int number = pb->getDataResearchCount(index);
+			List<String^>^ dataResearch = gcnew List<String^>(number);
+			String^ data;
+			for (int i = 0; i < number; i++) {
+				data = gcnew String(pb->getDataResearchRow(i, index));
+				dataResearch->Add(data);
+			}
+			return dataResearch;
+		}
+
+		List<String^>^ GetAlgorithmEvaluation(int index) {
+			int number = pb->getAlgorithmEvaluationCount(index);
+			List<String^>^ algorithmEvaluation = gcnew List<String^>(number);
+			String^ algorithm;
+			for (int i = 0; i < number; i++) {
+				algorithm = gcnew String(pb->getAlgorithmEvaluationRow(i, index));
+				algorithmEvaluation->Add(algorithm);
+			}
+			return algorithmEvaluation;
+		}
+
 		String^ GetFunctionInformation(int index, FunctionInformation functionString) {
 			FunctionString fs = static_cast<FunctionString>(functionString);
 			return gcnew String(pb->getFunctionInformation(index, fs));
+		}
+
+		String^ GetFunctionPluginFileName(int index) {
+			String^ fileName = gcnew String(pb->getFunctionPluginFileName(index));
+			return fileName;
 		}
 	};
 }
