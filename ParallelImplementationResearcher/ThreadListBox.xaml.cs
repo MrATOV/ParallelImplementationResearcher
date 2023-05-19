@@ -27,9 +27,10 @@ namespace ParallelImplementationResearcher
             set 
             { 
                 _threadNumber = value;
+				CheckList.Children.Clear();
                 for(int i = 0; i < _threadNumber; i++)
                 {
-                    SetCheckBox(i);
+					SetCheckBox(i);
                 }
             }
         }

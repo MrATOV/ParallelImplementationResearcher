@@ -9,6 +9,8 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
+using System.IO;
+using System.Windows.Media.Imaging;
 
 namespace ParallelImplementationResearcher
 {
@@ -45,10 +47,10 @@ namespace ParallelImplementationResearcher
 			InitializeComponent();
 			cb_ArrayGenerateType.SelectedIndex = 0;
 			cb_MatrixGenerateType.SelectedIndex = 0;
-			lb_threads.ThreadNumber = 16;
+			lb_threads.ThreadNumber = 15;
 			_researchBase = new ResearchBase();
 			_arraySize = new List<ulong>();
-			UpdateResearchList();
+			
 			BarPlot.Configuration.Pan = false;
 			BarPlot.Configuration.Zoom = false;
 			BarPlot.Configuration.ScrollWheelZoom = false;
@@ -56,7 +58,16 @@ namespace ParallelImplementationResearcher
 		}
 		private void FillDataResearchTable(int researchIndex)
 		{
-			var dataResearch = _researchBase.GetDataResearch(researchIndex);
+			List<string> dataResearch;
+			if (cb_ResearchList.SelectedItem.ToString().Contains("<...>"))
+			{
+				dataResearch = _researchBase.GetCurrentDataResearch();
+
+			}
+			else
+			{
+				dataResearch = _researchBase.GetDataResearch(researchIndex);
+			}
 			var dataResearchInformation = new List<DataResearchInformation>();
 			foreach (var data in dataResearch)
 			{
@@ -64,8 +75,8 @@ namespace ParallelImplementationResearcher
 				DataResearchInformation dri = new DataResearchInformation();
 				dri.ID = dataRow[0];
 				dri.AlgorithmName = dataRow[2];
-				dri.Parameters = dataRow[3];
-				dri.TypeImplementation = dataRow[4];
+				dri.TypeImplementation = dataRow[3];
+				dri.Data = dataRow[4];
 				dataResearchInformation.Add(dri);
 			}
 			DataResearchTable.ItemsSource = dataResearchInformation;
@@ -77,32 +88,66 @@ namespace ParallelImplementationResearcher
 			accelerationPlot.IsVisible = false;
 			efficiencyPlot.IsVisible = false;
 			costPlot.IsVisible = false;
+			BarPlot.Plot.XLabel("Количество потоков");
 			switch (plotType)
 			{
 				case PlotType.Time:
 					timePlot.IsVisible = true; 
 					BarPlot.Plot.Title("Время");
+					BarPlot.Plot.YLabel("Время, мс");
 					break;
 				case PlotType.Acceleration:
 					accelerationPlot.IsVisible = true;
 					BarPlot.Plot.Title("Коэффициент ускорения");
+					BarPlot.Plot.YLabel("Значение ускорения");
 					break;
 				case PlotType.Efficiency:
 					efficiencyPlot.IsVisible = true;
 					BarPlot.Plot.Title("Коэффициент эффективности");
+					BarPlot.Plot.YLabel("Значение эффективности");
 					break;
 				case PlotType.Cost:
 					costPlot.IsVisible = true;
 					BarPlot.Plot.Title("Коэффициент стоимости");
+					BarPlot.Plot.YLabel("Значение стоимости");
 					break;
 			}
 			BarPlot.Plot.AxisAuto();
 			BarPlot.Refresh();
 		}
 
+		private void FillDataParameters(int dataIndex)
+		{
+			cb_ParameterCaptionList.Items.Clear();
+			List<string> dataParameters;
+			if (cb_ResearchList.SelectedItem.ToString().Contains("<...>"))
+			{
+				dataParameters = _researchBase.GetCurrentDataParameters(dataIndex);
+			}
+			else
+			{
+				dataParameters = _researchBase.GetDataParameters(dataIndex);
+
+			}
+			foreach (var data in dataParameters)
+			{
+				string dataRow = data.Split("%%")[2];
+				cb_ParameterCaptionList.Items.Add(dataRow);
+			}
+			if (cb_ParameterCaptionList.Items.Count > 0) cb_ParameterCaptionList.SelectedIndex = 0;
+		}
+
 		private void FillAlgorithmEvaluation(int algorithmIndex)
 		{
-			var algorithmEvaluation = _researchBase.GetAlgorithmEvaluation(algorithmIndex);
+			List<string> algorithmEvaluation;
+			if (cb_ResearchList.SelectedItem.ToString().Contains("<...>"))
+			{
+				algorithmEvaluation = _researchBase.GetCurrentAlgorithmEvaluation(algorithmIndex);
+			}else
+			{
+				algorithmEvaluation = _researchBase.GetAlgorithmEvaluation(algorithmIndex);
+
+			}
 			var algorithmEvaluationInformation = new List<AlgorithmEvaluationInformation>();
 			foreach (var algorithm in algorithmEvaluation)
 			{
@@ -167,18 +212,22 @@ namespace ParallelImplementationResearcher
 			costPlot.Label = "Коэффициент стоимости";
 			costPlot.IsVisible = false;
 
+
 			rb_Time.IsChecked = true;
 		}
 
+		List<string>? researchList;
 		private void UpdateResearchList()
 		{
-			cb_ResearchList.Items.Clear();
-			List<string> researchList = (from research in _researchBase.GetResearchList
-										 select research.Replace("%%", " ")).ToList();
+			if (_researchBase.GetResearchListCount > 0)
+			{
+				researchList = new List<string>();
+				researchList = (from research in _researchBase.GetResearchList
+											 select research.Replace("%%", " ")).ToList();
 
-			cb_ResearchList.ItemsSource = researchList;
-			cb_ResearchList.SelectedIndex = 0;
-			FillDataResearchTable(int.Parse(cb_ResearchList.Text.Split(" ")[0]));
+				cb_ResearchList.ItemsSource = researchList;
+				//cb_ResearchList.SelectedIndex = 0;
+			}
 		}
 
 		private void MenuLoadPlugin_Click(object sender, RoutedEventArgs e)
@@ -201,6 +250,8 @@ namespace ParallelImplementationResearcher
 		{
 			gb_Array.Visibility = Visibility.Collapsed;
 			gb_Matrix.Visibility = Visibility.Collapsed;
+			gb_Text.Visibility = Visibility.Collapsed;
+			gb_Image.Visibility = Visibility.Collapsed;
 		}
 
 		private string GetDataTypeName(List<string> dataTypeList)
@@ -221,9 +272,11 @@ namespace ParallelImplementationResearcher
 						break;
 					case "Text":
 						dataTypeName += "Текст";
+						gb_Text.Visibility = Visibility.Visible;
 						break;
 					case "Image":
 						dataTypeName += "Изображение";
+						gb_Image.Visibility = Visibility.Visible;
 						break;
 					default:
 						dataTypeName += "Неизвестно";
@@ -274,24 +327,15 @@ namespace ParallelImplementationResearcher
 			sv.Content = tb;
 
 			TabItem ti = new TabItem();
-			ti.Header = $"Массив {TabProcessingData.Items.Count + 1}";
+			//ti.Header = $"Массив {TabProcessingData.Items.Count + 1}";
 			ti.Content = sv;
 			return ti;
 		}
 
 		private void ShowProcessingData()
 		{
-			if (dataInfo[0].Contains("Array"))
-			{
-				if (dataInfo[1].Contains("double"))
-				{
-					var processingData = _researchBase.GetProcessingData<double>((ulong)lb_AlgorithmList.SelectedIndex, 16, _arraySize[0]);
-					for(int i = 0; i < processingData.GetLength(0); i++)
-					{
-						TabProcessingData.Items.Add(AddProcessingArray(JoinRowMatrix(", ", processingData, i)));
-					}
-				}
-			}
+			var processingData = _researchBase.GetProcessingData();
+			cb_ProcessingDataList.ItemsSource = processingData;
 		}
 
 		private string JoinRowMatrix<T>(string splitter, T[,] matrix, int index)
@@ -304,17 +348,41 @@ namespace ParallelImplementationResearcher
 			return matrixStr;
 		}
 
+		private string JoinMatrix<T>(string splitter, T[,] matrix)
+		{
+			string matrixStr = "";
+			for (int i = 0; i < matrix.GetLength(0); i++)
+			{
+				for (int j = 0; j < matrix.GetLength(1); i++)
+				{
+					matrixStr += matrix[i, j].ToString() + splitter;
+				}
+			}
+			return matrixStr;
+		}
+
 		private void b_Execute_Click(object sender, RoutedEventArgs e)
 		{
 			_researchBase.SetConfidenceIntervalOptions(nud_ExecuteIterationNumber.uValue,
 				(AlphaPercent)cb_TrustValue.SelectedValue,
 				(IntervalTypeValue)cb_IntervalCoefficient.SelectedValue,
 				(CalculateValue)cb_IntervalValue.SelectedValue);
-			SetParameterValues();
 			List<int> threadNumbers = lb_threads.GetCheckedThreads;
 			_researchBase.AddThreadValues(threadNumbers);
+			_researchBase.SaveProcessingData(cb_ShowProcessingData.IsChecked.Value);
 			_researchBase.ExecuteFunction(lb_AlgorithmList.SelectedIndex);
-			ShowProcessingData();
+			if (cb_ShowProcessingData.IsChecked.Value)
+			{
+				ShowProcessingData();
+			}
+			AddNewResearch();
+
+			MessageBox.Show("Успешно");
+		}
+
+		private void AddNewResearch()
+		{
+			researchList.Add("<...>");
 		}
 
 		private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -322,6 +390,7 @@ namespace ParallelImplementationResearcher
 			cb_IntervalCoefficient.SelectedIndex = cb_IntervalCoefficient.Items.Count > 0 ? 0 : -1;
 			cb_IntervalValue.SelectedIndex = cb_IntervalValue.Items.Count > 0 ? 0 : -1;
 			cb_TrustValue.SelectedIndex = cb_TrustValue.Items.Count > 0 ? 0 : -1;
+			UpdateResearchList();
 		}
 
 		private void ClearParameters()
@@ -432,42 +501,54 @@ namespace ParallelImplementationResearcher
 			}
 		}
 
-		private void SetParameterValues()
+		private string SetParameterValues()
 		{
 			string parameterValues = "";
+			string parameterCaption = "";
 			foreach (var parameter in p_Parameters.Children)
 			{
+				if (parameter is TextBlock)
+				{
+					parameterCaption += ((TextBlock)parameter).Text + ": ";
+					continue;
+				}
 				if (parameter is CheckBox)
 				{
 					parameterValues += ((CheckBox)parameter).IsChecked == true ? "1 " : "0 ";
+					parameterCaption += ((CheckBox)parameter).Content.ToString() + (((CheckBox)parameter).IsChecked == true ? ": Да; " : ": Нет; ");
 					continue;
 				}
 				if (parameter is NumericUpDown)
 				{
 					parameterValues += ((NumericUpDown)parameter).Value.ToString() + " ";
+					parameterCaption += ((NumericUpDown)parameter).Value.ToString() + "; ";
 					continue;
 				}
 				if (parameter is NumSlider)
 				{
 					parameterValues += ((NumSlider)parameter).Value.ToString() + " ";
+					parameterCaption += ((NumSlider)parameter).Value.ToString() + "; ";
 					continue;
 				}
 				if (parameter is ComboBox)
 				{
 					parameterValues += ((ComboBox)parameter).SelectedIndex.ToString() + " ";
+					parameterCaption += ((ComboBox)parameter).SelectedIndex.ToString() + "; ";
 					continue;
 				}
 				if (parameter is TextBox)
 				{
-					parameterValues += ((TextBox)parameter).Text;
+					parameterValues += ((TextBox)parameter).Text + " ";
+					parameterCaption += ((TextBox)parameter).Text + "; ";
 				}
 			}
-			_researchBase.AddParameterValue(parameterValues);
+			_researchBase.AddParameterValue(parameterCaption, parameterValues);
+			return parameterCaption;
 		}
 
-		private void cb_Save_Click(object sender, RoutedEventArgs e)
+		private void cb_ShowProcessingData_Click(object sender, RoutedEventArgs e)
 		{
-			if (cb_Save.IsChecked.HasValue && cb_Save.IsChecked.Value)
+			if (cb_ShowProcessingData.IsChecked.HasValue && cb_ShowProcessingData.IsChecked.Value)
 			{
 				TabProcessingData.Visibility = Visibility.Visible;
 			}
@@ -512,17 +593,27 @@ namespace ParallelImplementationResearcher
 
 		private void b_generateMatrix_Click(object sender, RoutedEventArgs e)
 		{
-			string dataType = dataInfo[1];
+			string dataType = _researchBase.GetFunctionInformation(lb_AlgorithmList.SelectedIndex, FunctionInformation.DataType)
+				.Split(" ")[1];
 			if (cb_MatrixGenerateType.SelectedIndex == 1)
 			{
-				_researchBase.SetMatrixData(dataType, nud_MatrixRowSize.uValue, nud_MatrixColumnSize.uValue,
-					cb_Matrix_Sequence.IsChecked.Value);
+				_researchBase.SetMatrixData(dataType, nud_MatrixRowSize.uValue, nud_MatrixColumnSize.uValue, cb_Matrix_Sequence.IsChecked.Value);
 			}
 			else
 			{
-				_researchBase.SetMatrixData(dataType, nud_MatrixRowSize.uValue, nud_MatrixColumnSize.uValue,
+				_researchBase.SetMatrixData(dataType, nud_MatrixRowSize.uValue, nud_MatrixColumnSize.uValue, 
 					(int)nud_MinMatrix.Value, (int)nud_MaxMatrix.Value);
 			}
+			if (dataType.Contains("int")) TabInputData.Items.Add(AddNewInputMatrixTabItem(JoinMatrix(", ",
+				_researchBase.GetMatrixData<int>((ulong)TabInputData.Items.Count, nud_MatrixRowSize.uValue, nud_MatrixColumnSize.uValue))));
+			if (dataType.Contains("long")) TabInputData.Items.Add(AddNewInputMatrixTabItem(JoinMatrix(", ",
+				_researchBase.GetMatrixData<long>((ulong)TabInputData.Items.Count, nud_MatrixRowSize.uValue, nud_MatrixColumnSize.uValue))));
+			if (dataType.Contains("float")) TabInputData.Items.Add(AddNewInputMatrixTabItem(JoinMatrix(", ",
+				_researchBase.GetMatrixData<float>((ulong)TabInputData.Items.Count, nud_MatrixRowSize.uValue, nud_MatrixColumnSize.uValue))));
+			if (dataType.Contains("double")) TabInputData.Items.Add(AddNewInputMatrixTabItem(JoinMatrix(", ",
+				_researchBase.GetMatrixData<double>((ulong)TabInputData.Items.Count, nud_MatrixRowSize.uValue, nud_MatrixColumnSize.uValue))));
+			TabInputData.SelectedIndex = TabInputData.Items.Count - 1;
+			_arraySize.Add(nud_ArraySize.uValue);
 		}
 
 		private object AddNewInputArrayTabItem(string arrayInput)
@@ -541,6 +632,39 @@ namespace ParallelImplementationResearcher
 			ti.Content = sv;
 			return ti;
 		}
+		
+		private object AddNewInputTextTabItem(string textInput)
+		{
+			TextBlock tb = new TextBlock();
+			tb.Text = textInput;
+			tb.TextWrapping = TextWrapping.Wrap;
+
+			ScrollViewer sv = new ScrollViewer();
+			sv.HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled;
+			sv.VerticalScrollBarVisibility = ScrollBarVisibility.Visible;
+			sv.Content = tb;
+
+			TabItem ti = new TabItem();
+			ti.Header = $"Текст {TabInputData.Items.Count + 1}";
+			ti.Content = sv;
+			return ti;
+		}
+		private object AddNewInputMatrixTabItem(string matrixInput)
+		{
+			TextBlock tb = new TextBlock();
+			tb.Text = matrixInput;
+			tb.TextWrapping = TextWrapping.Wrap;
+
+			ScrollViewer sv = new ScrollViewer();
+			sv.HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled;
+			sv.VerticalScrollBarVisibility = ScrollBarVisibility.Visible;
+			sv.Content = tb;
+
+			TabItem ti = new TabItem();
+			ti.Header = $"Матрица {TabInputData.Items.Count + 1}";
+			ti.Content = sv;
+			return ti;
+		}
 
 		private void b_GenerateArray_Click(object sender, RoutedEventArgs e)
 		{
@@ -555,13 +679,13 @@ namespace ParallelImplementationResearcher
 				_researchBase.SetArrayData(dataType, nud_ArraySize.uValue, (int)nud_MinArray.Value, (int)nud_MaxArray.Value);
 			}
 			if (dataType.Contains("int")) TabInputData.Items.Add(AddNewInputArrayTabItem(string.Join(", ",
-				_researchBase.GetData<int>((ulong)TabInputData.Items.Count, nud_ArraySize.uValue))));
+				_researchBase.GetArrayData<int>((ulong)TabInputData.Items.Count, nud_ArraySize.uValue))));
 			if (dataType.Contains("long")) TabInputData.Items.Add(AddNewInputArrayTabItem(string.Join(", ",
-				_researchBase.GetData<long>((ulong)TabInputData.Items.Count, nud_ArraySize.uValue))));
+				_researchBase.GetArrayData<long>((ulong)TabInputData.Items.Count, nud_ArraySize.uValue))));
 			if (dataType.Contains("float")) TabInputData.Items.Add(AddNewInputArrayTabItem(string.Join(", ",
-				_researchBase.GetData<float>((ulong)TabInputData.Items.Count, nud_ArraySize.uValue))));
+				_researchBase.GetArrayData<float>((ulong)TabInputData.Items.Count, nud_ArraySize.uValue))));
 			if (dataType.Contains("double")) TabInputData.Items.Add(AddNewInputArrayTabItem(string.Join(", ",
-				_researchBase.GetData<double>((ulong)TabInputData.Items.Count, nud_ArraySize.uValue))));
+				_researchBase.GetArrayData<double>((ulong)TabInputData.Items.Count, nud_ArraySize.uValue))));
 			TabInputData.SelectedIndex = TabInputData.Items.Count - 1;
 			_arraySize.Add(nud_ArraySize.uValue);
 		}
@@ -626,7 +750,10 @@ namespace ParallelImplementationResearcher
 
 		private void DataResearchTable_SelectionChanged(object sender, SelectionChangedEventArgs e)
 		{
-			FillAlgorithmEvaluation(int.Parse((DataResearchTable.SelectedItem as DataResearchInformation).ID));
+			if ((DataResearchTable.SelectedItem as DataResearchInformation) != null)
+			{
+				FillDataParameters(int.Parse((DataResearchTable.SelectedItem as DataResearchInformation).ID));
+			}
 		}
 
 		private void RadioButton_Checked(object sender, RoutedEventArgs e)
@@ -651,6 +778,122 @@ namespace ParallelImplementationResearcher
 				
 				}
 			}
+		}
+
+		private void b_AddParameterSet_Click(object sender, RoutedEventArgs e)
+		{
+			if (p_Parameters.Children.Count > 1)
+			{
+				lb_ParametersList.Items.Add(SetParameterValues());
+			}
+			else
+			{
+				MessageBox.Show("Отсутствуют объекты для настройки параметров", "Предупреждение", MessageBoxButton.OK, MessageBoxImage.Warning);
+			}
+
+		}
+
+		private void cb_parameters_SelectionChanged(object sender, SelectionChangedEventArgs e)
+		{
+			int tableIndex = int.Parse((DataResearchTable.SelectedItem as DataResearchInformation).ID);
+			var dataResearch = _researchBase.GetDataParameters(tableIndex);
+			int algorithmIndex = int.Parse(dataResearch[cb_ParameterCaptionList.SelectedIndex].Split("%%")[0]);
+			FillAlgorithmEvaluation(algorithmIndex);
+		}
+
+		private void cb_ResearchList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+		{
+			if (cb_ResearchList.SelectedItem != null)
+			{
+				if (cb_ResearchList.SelectedItem.ToString().Contains("<...>"))
+				{
+					FillDataResearchTable(0);
+					SaveResearchPanel.Visibility = Visibility.Visible;
+				}
+				else
+				{
+					SaveResearchPanel.Visibility = Visibility.Collapsed;
+					FillDataResearchTable(int.Parse(cb_ResearchList.SelectedItem.ToString().Split(" ")[0]));
+				}
+
+			}
+		}
+
+		private void b_addNewResearch_Click(object sender, RoutedEventArgs e)
+		{
+			string researchName = tb_ResearchName.Text;
+			_researchBase.AddResearchToDB(researchName);
+			_researchBase.AddResearchInformationToDB();
+			UpdateResearchList();
+			MessageBox.Show("Успешно");
+		}
+
+		private object AddNewInputImageTabItem(byte[] imageInput)
+		{
+			MemoryStream memoryStream = new MemoryStream();
+			memoryStream.Write(imageInput, 0, imageInput.Length);
+
+			BitmapImage imgsource = new BitmapImage();
+			imgsource.BeginInit();
+			imgsource.StreamSource = memoryStream;
+			imgsource.EndInit();
+			Image image = new Image();
+			image.Source = imgsource;
+
+			ScrollViewer sv = new ScrollViewer();
+			sv.HorizontalScrollBarVisibility = ScrollBarVisibility.Visible;
+			sv.VerticalScrollBarVisibility = ScrollBarVisibility.Visible;
+			sv.Content = image;
+
+			TabItem ti = new TabItem();
+			ti.Header = $"Изображение {TabInputData.Items.Count + 1}";
+			ti.Content = sv;
+			return ti;
+		}
+
+		private void b_LoadImage_Click(object sender, RoutedEventArgs e)
+		{
+			var dialog = new OpenFileDialog();
+			dialog.Filter = "Изображение (.bmp)|*.bmp";
+
+			bool? result = dialog.ShowDialog();
+
+			if (result == true)
+			{
+				string fileName = dialog.FileName;
+				FileStream filestream = new FileStream(fileName, FileMode.Open, FileAccess.Read);
+				_researchBase.SetImageData(fileName);
+				var bitmapImage = _researchBase.GetImageData(0, (ulong)filestream.Length);
+				TabInputData.Items.Add(AddNewInputImageTabItem(bitmapImage));
+			}
+		}
+
+		private void b_GenerateRandomText_Click(object sender, RoutedEventArgs e)
+		{
+			_researchBase.SetTextData(nud_WordCount.uValue, nud_MinTextCount.uValue, nud_MaxTextCount.uValue);
+
+		}
+
+		private void b_ChangeThreadNumbers_Click(object sender, RoutedEventArgs e)
+		{
+			lb_threads.ThreadNumber = (int)nud_ThreadNumbersListCount.Value;
+		}
+
+		private void FillProcessingValues(int index)
+		{
+			string processingValues;
+			processingValues = _researchBase.GetProcessingValues(index);
+
+			TextBlock tb = new TextBlock();
+			tb.TextWrapping = TextWrapping.Wrap;
+			tb.Text = processingValues.Replace("%%", ", ");
+			sv_ProcessingData.Content = tb;
+		}
+
+		private void cb_ProcessingDataList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+		{
+			int algorithmIndex = int.Parse(cb_ProcessingDataList.Items[cb_ProcessingDataList.SelectedIndex].ToString().Split(" ")[0]);
+			FillProcessingValues(algorithmIndex);
 		}
 	}
 }

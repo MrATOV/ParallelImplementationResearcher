@@ -7,11 +7,11 @@
         xmlns:localkernel="clr-namespace:ResearchKernelWrapper;assembly=ResearchKernelWrapper"
         xmlns:ScottPlot="clr-namespace:ScottPlot;assembly=ScottPlot.WPF"
         mc:Ignorable="d"
-        Title="Исследование параллельной реализации алгоритмов" MinHeight="700" MinWidth="1140" Loaded="Window_Loaded">
+        Title="Исследование параллельной реализации алгоритмов" MinHeight="700" MinWidth="1140" Loaded="Window_Loaded" Width="1088">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="25"/>
-            <RowDefinition Height="100"/>
+            <RowDefinition Height="200"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="40"/>
             <RowDefinition Height="20"/>
@@ -29,6 +29,17 @@
                 <MenuItem Header="Загрузить плагин" Click="MenuLoadPlugin_Click"/>
                 <MenuItem Header="Список плагинов" Click="MenuOpenPluginListItem_Click"/>
             </MenuItem>
+            <MenuItem Header="Окно">
+                <MenuItem Header="Количество потоков">
+                    <StackPanel Orientation="Horizontal">
+                        <local:NumericUpDown x:Name="nud_ThreadNumbersListCount"  MinValue="4" MaxValue="100"  Value="15" Width="150" />
+                        <Button x:Name="b_ChangeThreadNumbers"  Content="Применить" Click="b_ChangeThreadNumbers_Click"/>
+                    </StackPanel>
+                </MenuItem>
+                <MenuItem Header="Размер изображения">
+                    <MenuItem Header="Исходный" IsCheckable="True"/>
+                </MenuItem>
+            </MenuItem>
             <MenuItem Header="Помощь"/>
         </Menu>
         <TabControl Grid.Column="2" Grid.Row="1" Grid.RowSpan="3" Grid.ColumnSpan="2">
@@ -39,32 +50,32 @@
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="0.5*"/>
-                                <ColumnDefinition Width="0.5*"/>
+                                <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <ComboBox x:Name="cb_ArrayGenerateType" VerticalAlignment="Center" Grid.Column="0" SelectionChanged="cb_ArrayGenerateType_SelectionChanged" Margin="5,0,5,0">
+                            <StackPanel VerticalAlignment="Center">
+                                <ComboBox x:Name="cb_ArrayGenerateType" VerticalAlignment="Center" Grid.Column="0" SelectionChanged="cb_ArrayGenerateType_SelectionChanged" Margin="5,14,5,0" Height="25">
                                 <TextBlock Text="Случайные значения"/>
                                 <TextBlock Text="Последовательность"/>
                             </ComboBox>
-                            <WrapPanel VerticalAlignment="Center" x:Name="p_Array_Random" Grid.Column="2">
+                             <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="5,0,5,0">
+                                <TextBlock Text="Количество элементов"/>
+                                <local:NumericUpDown x:Name="nud_ArraySize" MinValue="0"/>
+                            </StackPanel>
+                            </StackPanel>
+                            <WrapPanel VerticalAlignment="Center" HorizontalAlignment="Center" x:Name="p_Array_Random" Grid.Column="1">
                                 <StackPanel Margin="5,0,5,0">
                                     <TextBlock Text="Минимальное значение"/>
                                     <local:NumericUpDown x:Name="nud_MinArray" Value="0"/>
-                                </StackPanel>
-                                <StackPanel Margin="5,0,5,0">
                                     <TextBlock Text="Максимальное значение"/>
                                     <local:NumericUpDown x:Name="nud_MaxArray" Value="0"/>
                                 </StackPanel>
                             </WrapPanel>
-                            <CheckBox x:Name="cb_Array_Sequence" Grid.Column="2" VerticalAlignment="Center" Content="По возрастанию" Visibility="Collapsed"/>
-                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="5,0,5,0">
-                                <TextBlock Text="Количество элементов"/>
-                                <local:NumericUpDown x:Name="nud_ArraySize" MinValue="0"/>
+                            <CheckBox x:Name="cb_Array_Sequence" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center" Content="По возрастанию" Visibility="Collapsed"/>
+                            <StackPanel Grid.Column="2" VerticalAlignment="Bottom">
+                                <Button x:Name="b_GenerateArray" VerticalAlignment="Center" Content="Сгенерировать" Click="b_GenerateArray_Click" Height="26" Margin="0,0,0,10"/>
+                                <Button x:Name="b_GetArrayFromFile" VerticalAlignment="Center" Content="Загрузить массив из файла" Click="b_GetArrayFromFile_Click" Height="25" Margin="0,5,0,2"/>
                             </StackPanel>
-                            <Button x:Name="b_GetArrayFromFile" VerticalAlignment="Center" Grid.Column="4" Content="Загрузить массив из файла" Click="b_GetArrayFromFile_Click" />
-                            <Button x:Name="b_GenerateArray" VerticalAlignment="Center" Grid.Column="3" Content="Сгенерировать" Click="b_GenerateArray_Click" Margin="5,0,5,0"/>
                         </Grid>
                         </GroupBox>
                     <GroupBox DockPanel.Dock="Top" x:Name="gb_Matrix" Header="Матрица" Visibility="Visible">
@@ -73,8 +84,7 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="0.5*"/>
-                                <ColumnDefinition Width="0.5*"/>
+                                <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
                             <ComboBox x:Name="cb_MatrixGenerateType" VerticalAlignment="Center" Grid.Column="0" SelectionChanged="cb_MatrixGenerateType_SelectionChanged" Margin="5,0,5,0">
                                 <TextBlock Text="Случайные значения"/>
@@ -101,20 +111,69 @@
                                     <local:NumericUpDown MinValue="1" x:Name="nud_MatrixColumnSize"/>
                                 </StackPanel>
                             </WrapPanel>
-                            <Button x:Name="b_GetMatrixFromFile" VerticalAlignment="Center" Grid.Column="4" Content="Загрузить массив из файла" Click="b_GetMatrixFromFile_Click" Margin="5,0,5,0" />
-                            <Button x:Name="b_generateMatrix" VerticalAlignment="Center" Grid.Column="3" Content="Сгенерировать" Click="b_generateMatrix_Click" Margin="5,0,5,0"/>
+                            <StackPanel VerticalAlignment="Bottom" Grid.Column="3">
+                                <Button x:Name="b_GetMatrixFromFile" VerticalAlignment="Center" Content="Загрузить массив из файла" Click="b_GetMatrixFromFile_Click" Margin="5,0,5,5" Height="26" />
+                                <Button x:Name="b_generateMatrix" VerticalAlignment="Center" Content="Сгенерировать" Click="b_generateMatrix_Click" Margin="5,10,5,2" Height="26"/>
+                            </StackPanel>
                         </Grid>
                         </GroupBox>
-
-                    <TabControl x:Name="TabInputData">
+                    <GroupBox DockPanel.Dock="Top" x:Name="gb_Text" Header="Текст" Visibility="Visible">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <WrapPanel VerticalAlignment="Center" Grid.Column="0">
+                                <StackPanel Margin="5,0,11,0">
+                                    <TextBlock Text="Минимальная длина слова"/>
+                                    <local:NumericUpDown Value="0" x:Name="nud_MinTextCount"/>
+                                </StackPanel>
+                                <StackPanel Margin="5,0,8,0">
+                                    <TextBlock Text="Максимальная длина слова"/>
+                                    <local:NumericUpDown Value="0" x:Name="nud_MaxTextCount"/>
+                                </StackPanel>
+                            </WrapPanel>
+                            <WrapPanel VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Column="1">
+                                <StackPanel Margin="0,0,8,0">
+                                    <TextBlock Text="Количество слов"/>
+                                    <local:NumericUpDown Value="0" x:Name="nud_WordCount"/>
+                                </StackPanel>
+                            </WrapPanel>
+                            <StackPanel Grid.Column="2" VerticalAlignment="Bottom">
+                                <Button x:Name="b_GenerateRandomText" Content="Сгенерировать текст" Margin="0,17,0,0" Height="26" Click="b_GenerateRandomText_Click"/>
+                                <Button x:Name="b_AddTextFromFile" Content="Загрузить текст из файла" Margin="0,10,0,2" Height="26"/>
+                            </StackPanel>
+                        </Grid>
+                    </GroupBox>
+                    <GroupBox DockPanel.Dock="Top" x:Name="gb_Image" Header="Изображение" Visibility="Visible">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width ="*"/>
+                                <ColumnDefinition Width ="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Button x:Name="b_LoadImage" Content="Загрузить изображение из файла" Height="26" Margin="40,0,40,0" Click="b_LoadImage_Click" />
+                            <Button Grid.Column="1"  x:Name="b_LoadImages" Content="Загрузить несколько изображений" Height="26" Margin="40,0,40,0" Click="b_LoadImage_Click" />
+                        </Grid>
+                    </GroupBox>
+                        <TabControl x:Name="TabInputData">
                         
                     </TabControl>
                 </DockPanel>
             </TabItem>
-            <TabItem Header="Обработанные данные">
-                <TabControl x:Name="TabProcessingData"/>
+            <TabItem x:Name="TabProcessingData" Header="Обработанные данные">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="Обработанные данные"/>
+                    <ComboBox Grid.Row="1" x:Name="cb_ProcessingDataList" SelectionChanged="cb_ProcessingDataList_SelectionChanged" />
+                    <ScrollViewer Grid.Row="2" x:Name="sv_ProcessingData"/>
+                </Grid>
             </TabItem>
-            <TabItem Header="Все исследования">
+            <TabItem Header="Исследования">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>
@@ -124,8 +183,9 @@
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
-                    <ComboBox x:Name="cb_ResearchList"/>
+                    <ComboBox x:Name="cb_ResearchList" SelectionChanged="cb_ResearchList_SelectionChanged"/>
                     <DataGrid Grid.Row="1" x:Name="DataResearchTable" CanUserAddRows="False" CanUserDeleteRows="False" CanUserResizeColumns="False" CanUserResizeRows="False" AutoGenerateColumns="false" IsReadOnly="True" ColumnWidth="*" FontSize="14" FontFamily="Times New Roman" SelectionChanged="DataResearchTable_SelectionChanged">
                         <DataGrid.Resources>
                             <Style TargetType="TextBlock" x:Key="WrapText">
@@ -135,19 +195,25 @@
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Номер" Width="0.20*" Binding="{Binding Path=ID}" ElementStyle="{StaticResource WrapText}"/>
                             <DataGridTextColumn Header="Название функции" Width="0.5*" Binding="{Binding Path=AlgorithmName}" ElementStyle="{StaticResource WrapText}"/>
-                            <DataGridTextColumn Header="Параметры" Width="0.5*" Binding="{Binding Path=Parameters}" ElementStyle="{StaticResource WrapText}"/>
                             <DataGridTextColumn Header="Способ реализации" Width="0.5*" Binding="{Binding Path=TypeImplementation}" ElementStyle="{StaticResource WrapText}"/>
-                        </DataGrid.Columns>
+                            <DataGridTextColumn Header="Обрабатываемые данные" Width="0.5*" Binding="{Binding Path=Data}" ElementStyle="{StaticResource WrapText}"/>
+                            </DataGrid.Columns>
                     </DataGrid>
                     <GridSplitter Grid.ColumnSpan="1" Grid.Row="2" ShowsPreview="false" Height="10" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
-                    <TabControl Grid.Row="3" TabStripPlacement="Bottom">
+                    <Grid Grid.Row="3">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <ComboBox  x:Name="cb_ParameterCaptionList" SelectionChanged="cb_parameters_SelectionChanged"/>
+                        <TabControl Grid.Row="1" TabStripPlacement="Bottom">
                         <TabItem Header="График">
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="*"/>
                                     <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
-                                <ScottPlot:WpfPlot x:Name="BarPlot" Height="Auto" Width="Auto"/>
+                                <ScottPlot:WpfPlot Grid.Row="0" x:Name="BarPlot" Height="Auto" Width="Auto"/>
                                 <Grid Grid.Row="1">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="0.6*"/>
@@ -172,7 +238,7 @@
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="Номер" Width="0.3*" Binding="{Binding Path=ID}" ElementStyle="{StaticResource WrapText}"/>
                                     <DataGridTextColumn Header="Количество потоков" Width="1*" Binding="{Binding Path=ThreadNumber}" ElementStyle="{StaticResource WrapText}"/>
-                                    <DataGridTextColumn Header="Время выполнения" Width="1*" Binding="{Binding Path=Time}" ElementStyle="{StaticResource WrapText}"/>
+                                    <DataGridTextColumn Header="Время выполнения, мс" Width="1*" Binding="{Binding Path=Time}" ElementStyle="{StaticResource WrapText}"/>
                                     <DataGridTextColumn Header="Коэффициент ускорения" Width="1*" Binding="{Binding Path=Acceleration}" ElementStyle="{StaticResource WrapText}"/>
                                     <DataGridTextColumn Header="Коэффициент эффективности" Width="1*" Binding="{Binding Path=Efficiency}" ElementStyle="{StaticResource WrapText}"/>
                                     <DataGridTextColumn Header="Коэффициент стоймости" Width="1*" Binding="{Binding Path=Cost}" ElementStyle="{StaticResource WrapText}"/>
@@ -180,18 +246,53 @@
                             </DataGrid>
                         </TabItem>
                     </TabControl>
+                    </Grid>
+                    <Grid x:Name="SaveResearchPanel" Grid.Row="4" Visibility="Visible" Margin="0,10,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="Название исследования"/>
+                            <TextBox x:Name="tb_ResearchName" Text="Новое исследование"/>
+                        </StackPanel>
+                        <Button Grid.Column="1" x:Name="b_addNewResearch" Content="Сохранить исследование" Margin="10,0,0,0" Click="b_addNewResearch_Click"/>
+                    </Grid>
                 </Grid>
             </TabItem>
         </TabControl>
         <Border Padding="12,0,12,0" Background="GhostWhite" BorderBrush="Gainsboro" BorderThickness="1" Grid.Column="0" Grid.Row="2">
-            <StackPanel x:Name="p_Parameters">
-                <Label Content="Параметры алгоритма" FontSize="14.5" FontWeight="Bold"/>
-            </StackPanel>
+            <DockPanel LastChildFill="true">
+                <Button x:Name="b_AddParameterSet" DockPanel.Dock="Bottom" Content="Добавить набор параметров" Margin="0,0,0,10" Click="b_AddParameterSet_Click" />
+                <StackPanel x:Name="p_Parameters">
+                    <Label Content="Параметры алгоритма" FontSize="14.5" FontWeight="Bold"/>
+                </StackPanel>
+            </DockPanel>
         </Border>
-        <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Orientation="Vertical">
-            <TextBlock FontWeight="Bold" Text="Алгоритмы" FontSize="15" TextAlignment="Center"/>
-            <ListBox Name="lb_AlgorithmList" Grid.Row="1" Grid.ColumnSpan="2" SelectionChanged="lb_AlgorithmList_SelectionChanged" Height="80" />
-        </StackPanel>
+        <Grid Grid.Row="1" Grid.ColumnSpan="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <TextBlock FontWeight="Bold" Text="Алгоритмы" FontSize="15" TextAlignment="Center"/>
+                <ListBox Grid.Row="1" Name="lb_AlgorithmList" SelectionChanged="lb_AlgorithmList_SelectionChanged" />
+            </Grid>
+            <GridSplitter Grid.Row="1" ShowsPreview="false" Height="3" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
+            <Grid Grid.Row="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                    <TextBlock FontWeight="Bold" Text="Набор параметров" FontSize="15" TextAlignment="Center"/>
+                <ListBox Grid.Row="1" Name="lb_ParametersList" ScrollViewer.HorizontalScrollBarVisibility="Auto"/>
+            </Grid>
+        </Grid>
         <Border Padding="12,0,12,0" Background="GhostWhite" BorderBrush="Gainsboro" BorderThickness="1" Grid.Column="1" Grid.Row="2">
             <StackPanel>
                 <TextBlock Text="Параметры исследования" FontWeight="Bold" FontSize="15" TextWrapping="Wrap" TextAlignment="Center"/>
@@ -205,7 +306,7 @@
                 <ComboBox x:Name="cb_IntervalValue" ItemsSource="{local:EnumBindingSource localkernel:CalculateValue}"/>
                 <TextBlock Text="Уровень доверия" Margin="0,14,0,0"/>
                 <ComboBox x:Name="cb_TrustValue" ItemsSource="{local:EnumBindingSource localkernel:AlphaPercent}"/>
-                <CheckBox x:Name="cb_Save" Content="Вывод результатов" IsChecked="True" Margin="0,14,0,0" Click="cb_Save_Click" />
+                <CheckBox x:Name="cb_ShowProcessingData" Content="Вывод результатов" IsChecked="True" Margin="0,14,0,0" Click="cb_ShowProcessingData_Click" />
             </StackPanel>
         </Border>
         <Button x:Name="b_Execute" Content="Выполнить" Grid.ColumnSpan="2" Grid.Row="3" Margin="60,4,60,4" Click="b_Execute_Click" />

@@ -102,9 +102,10 @@ namespace ResearchKernelWrapper {
 			pb->addPlugin(strPluginFileName);
 		}
 
-		void AddParameterValue(String^ values) {
+		void AddParameterValue(String^ caption, String^ values) {
+			pin_ptr<const WCHAR> strCaption = PtrToStringChars(caption);
 			pin_ptr<const WCHAR> strValues = PtrToStringChars(values);
-			pb->addParameterValue(strValues);
+			pb->addParameterValue(strCaption, strValues);
 		}
 
 		void AddThreadValue(int ThreadNumber) {
@@ -144,20 +145,60 @@ namespace ResearchKernelWrapper {
 			pb->setArrayData(strDataType, size, isIncrease);
 		}
 
+		void SetImageData(String^ fileName) {
+			pin_ptr<const WCHAR> strFileName = PtrToStringChars(fileName);
+			pb->setImageData(strFileName);
+		}
+
 		generic <class T>
-		array<T>^ GetData(size_t index, size_t size) {
+		array<T>^ GetArrayData(size_t index, size_t size) {
 			array<T>^ arr = gcnew array<T>(size);
 			pin_ptr<T> p = &arr[0];
-			pb->getData(index, p);
+			pb->getDefaultData(index, p);
 			return arr;
 		}
 
 		generic <class T>
-		array<T,2>^ GetProcessingData(size_t index, size_t dataSize, size_t arraySize) {
-			array<T, 2>^ arr = gcnew array<T, 2>(dataSize, arraySize);
-			pin_ptr<T> p = &arr[0,0];
-			pb->getProcessingData(index, p);
-			return arr;
+		array<T,2>^ GetMatrixData(size_t index, size_t rowSize, size_t columnSize) {
+			array<T, 2>^ matr = gcnew array<T, 2>(rowSize, columnSize);
+			pin_ptr<T> p = &matr[0,0];
+			pb->getDefaultData(index, p);
+			return matr;
+		}
+
+		array<unsigned char>^ GetImageData(size_t index, size_t size) {
+			array<unsigned char>^ image = gcnew array<unsigned char>(size);
+			pin_ptr<unsigned char> p = &image[0];
+			pb->getDefaultData(index, p);
+			return image;
+		}
+		
+		String^ GetTextData(size_t index, size_t size) {
+			array<WCHAR>^ text = gcnew array<WCHAR>(size);
+			pin_ptr<WCHAR> p = &text[0];
+			pb->getDefaultData(index, p);
+			String^ str = gcnew String(text);
+			return str;
+		}
+
+		void SaveProcessingData(bool needSave) {
+			pb->needSaveProcessingData(needSave);
+		}
+
+		List<String^>^ GetProcessingData() {
+			int number = pb->getProcessingDataCount();
+			List<String^>^ processingData = gcnew List<String^>(number);
+			String^ data;
+			for (int i = 0; i < number; i++) {
+				data = gcnew String(pb->getProcessingData(i));
+				processingData->Add(data);
+			}
+			return processingData;
+		}
+
+		String^ GetProcessingValues(int index) {
+			String^ values = gcnew String(pb->getProcessingValues(index));
+			return values;
 		}
 
 		void SetMatrixData(String^ dataType, size_t rowSize, size_t columnSize, int minValue, int maxValue) {
@@ -168,6 +209,15 @@ namespace ResearchKernelWrapper {
 		void SetMatrixData(String^ dataType, size_t rowSize, size_t columnSize, bool isIncrease) {
 			pin_ptr<const WCHAR> strDataType = PtrToStringChars(dataType);
 			pb->setMatrixData(strDataType, rowSize, columnSize, isIncrease);
+		}
+
+		void SetTextData(String^ text, size_t length) {
+			pin_ptr<const WCHAR> strText = PtrToStringChars(text);
+			pb->setTextData(strText, text->Length);
+		}
+		
+		void SetTextData(size_t wordCount, size_t minWordLength, size_t maxWordLength) {
+			pb->setTextData(wordCount, minWordLength, maxWordLength);
 		}
 
 		property int GetFunctionCount {
@@ -205,6 +255,12 @@ namespace ResearchKernelWrapper {
 			}
 		}
 
+		property int GetResearchListCount {
+			int get() {
+				return pb->getResearchListCount();
+			}
+		}
+
 		List<String^>^ GetDataResearch(int index) {
 			int number = pb->getDataResearchCount(index);
 			List<String^>^ dataResearch = gcnew List<String^>(number);
@@ -216,12 +272,56 @@ namespace ResearchKernelWrapper {
 			return dataResearch;
 		}
 
+		List<String^>^ GetDataParameters(int index) {
+			int number = pb->getDataParametersCount(index);
+			List<String^>^ dataResearch = gcnew List<String^>(number);
+			String^ data;
+			for (int i = 0; i < number; i++) {
+				data = gcnew String(pb->getDataParametersRow(i, index));
+				dataResearch->Add(data);
+			}
+			return dataResearch;
+		}
+
 		List<String^>^ GetAlgorithmEvaluation(int index) {
 			int number = pb->getAlgorithmEvaluationCount(index);
 			List<String^>^ algorithmEvaluation = gcnew List<String^>(number);
 			String^ algorithm;
 			for (int i = 0; i < number; i++) {
 				algorithm = gcnew String(pb->getAlgorithmEvaluationRow(i, index));
+				algorithmEvaluation->Add(algorithm);
+			}
+			return algorithmEvaluation;
+		}
+		
+		List<String^>^ GetCurrentDataResearch() {
+			int number = pb->getCurrentDataResearchCount();
+			List<String^>^ dataResearch = gcnew List<String^>(number);
+			String^ data;
+			for (int i = 0; i < number; i++) {
+				data = gcnew String(pb->getCurrentDataResearchRow(i));
+				dataResearch->Add(data);
+			}
+			return dataResearch;
+		}
+
+		List<String^>^ GetCurrentDataParameters(int index) {
+			int number = pb->getCurrentDataParametersCount(index - 1);
+			List<String^>^ dataResearch = gcnew List<String^>(number);
+			String^ data;
+			for (int i = 0; i < number; i++) {
+				data = gcnew String(pb->getCurrentDataParametersRow(i, index - 1));
+				dataResearch->Add(data);
+			}
+			return dataResearch;
+		}
+
+		List<String^>^ GetCurrentAlgorithmEvaluation(int index) {
+			int number = pb->getCurrentAlgorithmEvaluationCount(index - 1);
+			List<String^>^ algorithmEvaluation = gcnew List<String^>(number);
+			String^ algorithm;
+			for (int i = 0; i < number; i++) {
+				algorithm = gcnew String(pb->getCurrentAlgorithmEvaluationRow(i, index - 1));
 				algorithmEvaluation->Add(algorithm);
 			}
 			return algorithmEvaluation;

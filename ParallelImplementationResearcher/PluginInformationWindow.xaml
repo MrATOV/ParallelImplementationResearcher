@@ -7,20 +7,23 @@
         mc:Ignorable="d"
         Title="Список плагинов" MinHeight="450" MinWidth="800" Height="450" Width="800">
     <Grid>
-        <DataGrid x:Name="PluginInformationTable" CanUserAddRows="False" CanUserDeleteRows="False" CanUserResizeColumns="False" CanUserResizeRows="False" AutoGenerateColumns="false" IsReadOnly="True" ColumnWidth="*" FontSize="14" FontFamily="Times New Roman">
+        <DataGrid x:Name="PluginInformationTable" CanUserAddRows="False" CanUserDeleteRows="False" CanUserResizeColumns="False" CanUserResizeRows="False" AutoGenerateColumns="false" IsReadOnly="True" ColumnWidth="*" FontSize="20" FontFamily="Times New Roman">
             <DataGrid.Resources>
                 <Style TargetType="TextBlock" x:Key="WrapText">
                     <Setter Property="TextWrapping" Value="Wrap"/>
                 </Style>
+                <Style TargetType="DataGridColumnHeader" x:Key="WrapHeader">
+                    <Setter Property="TextBlock.TextWrapping" Value="Wrap"/>
+                </Style>
             </DataGrid.Resources>
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Номер" Width="0.19*" Binding="{Binding Path=ID}" ElementStyle="{StaticResource WrapText}"/>
-                <DataGridTextColumn Header="Название файла" Width="0.5*" Binding="{Binding Path=NamePluginFile}" ElementStyle="{StaticResource WrapText}"/>
-                <DataGridTextColumn Header="Название функции" Width="0.5*" Binding="{Binding Path=NameFunction}" ElementStyle="{StaticResource WrapText}"/>
-                <DataGridTextColumn Header="Описание" Width="1*" Binding="{Binding Path=FunctionDescription}" ElementStyle="{StaticResource WrapText}"/>
-                <DataGridTextColumn Header="Реализация" Width="0.35*" Binding="{Binding Path=FunctionRealisation}" ElementStyle="{StaticResource WrapText}"/>
-                <DataGridTextColumn Header="Разработчик" Width="0.35*" Binding="{Binding Path=Developer}" ElementStyle="{StaticResource WrapText}"/>
-                <DataGridTextColumn Header="Версия" Width="0.2*" Binding="{Binding Path=Version}" ElementStyle="{StaticResource WrapText}"/>
+                <DataGridTextColumn Header="Номер" Width="0.19*" Binding="{Binding Path=ID}" HeaderStyle="{StaticResource WrapHeader}" ElementStyle="{StaticResource WrapText}"/>
+                <DataGridTextColumn Header="Название файла" Width="0.5*" Binding="{Binding Path=NamePluginFile}" HeaderStyle="{StaticResource WrapHeader}" ElementStyle="{StaticResource WrapText}"/>
+                <DataGridTextColumn Header="Название функции" Width="0.5*" Binding="{Binding Path=NameFunction}" HeaderStyle="{StaticResource WrapHeader}" ElementStyle="{StaticResource WrapText}"/>
+                <DataGridTextColumn Header="Описание" Width="1*" Binding="{Binding Path=FunctionDescription}" HeaderStyle="{StaticResource WrapHeader}" ElementStyle="{StaticResource WrapText}"/>
+                <DataGridTextColumn Header="Реализация" Width="0.35*" Binding="{Binding Path=FunctionRealisation}" HeaderStyle="{StaticResource WrapHeader}" ElementStyle="{StaticResource WrapText}"/>
+                <DataGridTextColumn Header="Разработчик" Width="0.35*" Binding="{Binding Path=Developer}" HeaderStyle="{StaticResource WrapHeader}" ElementStyle="{StaticResource WrapText}"/>
+                <DataGridTextColumn Header="Версия" Width="0.2*" Binding="{Binding Path=Version}" HeaderStyle="{StaticResource WrapHeader}" ElementStyle="{StaticResource WrapText}"/>
             </DataGrid.Columns>
             
         </DataGrid>
